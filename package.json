@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/pvpscript/nodejs-keycloak-auth/issues"
   },
-  "homepage": "https://github.com/pvpscript/nodejs-keycloak-auth#readme"
+  "homepage": "https://github.com/pvpscript/nodejs-keycloak-auth#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
