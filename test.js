@@ -14,9 +14,6 @@ const urlEncodeObjectData = (data) => Object.keys(data)
 	.map(k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
 	.join('&');
 
-const openUrls = ['/', '/start-login', '/callback', '/refresh-test', '/introspect-test'];
-const checkUrl = (url) => openUrls.find(u => u == url) === undefined;
-
 async function openidRefresh(refreshToken) {
 	const data = {
 		grant_type: 'refresh_token',
@@ -68,11 +65,11 @@ async function openidIntrospect(token) {
 	});
 }
 
-const validateToken = async (headers) => {
-	const authorization = headers.authorization;
+const secureRouter = express.Router()
 
-	if (authorization) {
-		const token = authorization.replace(/^Bearer /, '');
+const validateToken = async (auth) => {
+	if (auth) {
+		const token = auth.replace(/^Bearer /, '');
 		const result = await openidIntrospect(token).then(r => r.json());
 
 		if (!result.active)	
@@ -80,17 +77,35 @@ const validateToken = async (headers) => {
 	} else {
 		throw new Error('Token was not provided.');
 	}
-}
+};
 
-const testing = async function (req, res, next) {
-	if (checkUrl(req.url)) {
-		console.log(req.headers);
-		await validateToken(req.headers);
+secureRouter.use('*', (req, res, next) => {
+	const authorization = req.headers.authorization;
+	try {
+		validateToken(authorization);
+		next();
+	} catch (err) {
+		next(err);
 	}
 
-	next();
-}
-app.use(testing);
+	req.redirect('/start-login');
+	req.end();
+});
+
+
+secureRouter.use('/do-authenticated-stuff', (req, res, next) => {
+	try {
+		validateToken(req.headers.authorization);
+		next();
+	} catch (err) {
+		console.log(`An error occurred: ${err}`);
+		next(err);
+	}
+
+	res.end();
+});
+
+app.use(secureRouter);
 
 app.get('/', (req, res) => {
 	res.send("Hello, World!");
@@ -140,6 +155,15 @@ app.get('*', (req, res) => {
 	res.send('Not found');
 });
 
-app.listen(port, function() {
-	console.log(`App listening on port ${port}`);
+app.use((err, req, res, next) => {
+	console.error(err.stack);
+	res.status(500).send('An error occurred!');
+});
+
+app.listen(port, (err) => {
+	if (err) {
+		console.log(`An error occurred: ${err}`);
+	} else {
+		console.log(`App listening on port ${port}`);
+	}
 });
