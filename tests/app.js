@@ -14,7 +14,7 @@ const port = 9876;
 app.set('json spaces', 4);
 app.set('trust proxy', 1);
 
-const expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+const expiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 app.use(session({
 	secret: process.env.SESSION_SECRET,
 	genid: _ => crypto.randomUUID(),

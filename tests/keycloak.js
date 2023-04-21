@@ -12,11 +12,11 @@ const urlEncodeObjectData = (data) => Object.keys(data)
 	.map(k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
 	.join('&');
 
-module.exports.startLogin = () => {
+module.exports.startLogin = function() {
 	const data = {
-		client_id: CLIENT_ID,
-		response_type: 'code',
-		redirect_uri: 'http://localhost:9876/callback',
+		'client_id': CLIENT_ID,
+		'response_type': 'code',
+		'redirect_uri': 'http://localhost:9876/callback',
 		scope: 'openid',
 		state: 'my_state',
 	};
@@ -27,10 +27,10 @@ module.exports.startLogin = () => {
 
 module.exports.openidRefresh = async (refreshToken) => {
 	const data = {
-		grant_type: 'refresh_token',
-		refresh_token: refreshToken,
-		client_id: CLIENT_ID,
-		client_secret: CLIENT_SECRET,
+		'grant_type': 'refresh_token',
+		'refresh_token': refreshToken,
+		'client_id': CLIENT_ID,
+		'client_secret': CLIENT_SECRET,
 	};
 
 	return await fetch(OPENID_TOKEN_URI, {
@@ -44,11 +44,11 @@ module.exports.openidRefresh = async (refreshToken) => {
 
 module.exports.openidToken = async (code) => {
 	const payload = {
-		grant_type: 'authorization_code',
+		'grant_type': 'authorization_code',
+		'client_id': CLIENT_ID,
+		'client_secret': CLIENT_SECRET,
+		'redirect_uri': 'http://localhost:9876/callback',
 		code: code,
-		client_id: CLIENT_ID,
-		client_secret: CLIENT_SECRET,
-		redirect_uri: 'http://localhost:9876/callback'
 	};
 
 	const data = {
@@ -61,13 +61,13 @@ module.exports.openidToken = async (code) => {
 
 	return await fetch(OPENID_TOKEN_URI, data)
 		.then(r => r.json())
-		.then(token => jwt.generate(token));
+		//.then(token => jwt.generate(token));
 }
 
 const openidIntrospect = async (token) => {
 	const data = {
-		client_id: CLIENT_ID,
-		client_secret: CLIENT_SECRET,
+		'client_id': CLIENT_ID,
+		'client_secret': CLIENT_SECRET,
 		token: token,
 	}
 
@@ -101,25 +101,16 @@ module.exports.validateTokenFromCookie = async (session) => {
 
 	if (storage) {
 		const auth = storage[sessionId];
-
-		if (auth) {
-			const jwtToken = storage[sessionId];
-			const jwtData = jwt.check(jwtToken);
-
-			const token = jwtData['access_token'];
-
-			if (!token) {
-				throw new Error('Token was not provided.');
-			}
-
-			//const validation = await openidIntrospect(token).then(r => r.json());
-
-			//if (!validation.active) {
-			//	throw new Error('Token is invalid or expired.');
-			//}
-		} else {
+		if (!auth) {
 			throw new Error('No authentication data for session id.');
 		}
+
+		const token = auth['access_token'];
+		if (!token) {
+			throw new Error('Token was not provided.');
+		}
+
+		jwt.check(token);
 	} else {
 		throw new Error('Storage not created');
 	}
