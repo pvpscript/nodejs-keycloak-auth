@@ -1,17 +1,25 @@
 const jwt = require('jsonwebtoken');
+const { JwksClient } = require('jwks-rsa');
 
-const secret = process.env.JWT_SECRET;
-const expiration = process.env.JWT_EXPIRES_IN;
+const KC_CERTS_URI = process.env.KC_REALM_URI + '/protocol/openid-connect/certs';
 
-module.exports.generate = (data) => {
-	return jwt.sign(data, secret, {
-		expiresIn: parseInt(expiration),
+const check = (token) => {
+	const client = new JwksClient({
+		jwksUri: KC_CERTS_URI,
 	});
-};
 
-module.exports.check = (token) =>
-	jwt.verify(token, secret, (err, decoded) => {
+	const getKey = (header, callback) => {
+		client.getSigningKey(header.kid, (err, key) => {
+			const signingKey = key.publicKey || key.rsaPublicKey;
+			callback(null, signingKey);
+		});
+	};
+
+	return jwt.verify(token, getKey, (err, decoded) => {
 		if (err) throw err;
 
 		return decoded;
 	});
+};
+
+module.exports = { check };
