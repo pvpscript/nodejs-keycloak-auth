@@ -12,6 +12,19 @@ const urlEncodeObjectData = (data) => Object.keys(data)
 	.map(k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
 	.join('&');
 
+const keycloakRequest = async (payload) => {
+	const data = {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: urlEncodeObjectData(payload),
+	};
+
+	return await fetch(OPENID_TOKEN_URI, data)
+		.then(r => r.json())
+}
+
 module.exports.startLogin = function() {
 	const data = {
 		'client_id': CLIENT_ID,
@@ -22,24 +35,18 @@ module.exports.startLogin = function() {
 	};
 
 	const loginUri = OPENID_AUTH_URI + "?" + urlEncodeObjectData(data);
-	return loginUri
+	return loginUri;
 }
 
-module.exports.openidRefresh = async (refreshToken) => {
-	const data = {
+const openidRefresh = async (refreshToken) => {
+	const payload = {
 		'grant_type': 'refresh_token',
 		'refresh_token': refreshToken,
 		'client_id': CLIENT_ID,
 		'client_secret': CLIENT_SECRET,
 	};
-
-	return await fetch(OPENID_TOKEN_URI, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		body: urlEncodeObjectData(data),
-	});
+	
+	return await keycloakRequest(payload);
 }
 
 module.exports.openidToken = async (code) => {
@@ -51,17 +58,7 @@ module.exports.openidToken = async (code) => {
 		code: code,
 	};
 
-	const data = {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		body: urlEncodeObjectData(payload),
-	};
-
-	return await fetch(OPENID_TOKEN_URI, data)
-		.then(r => r.json())
-		//.then(token => jwt.generate(token));
+	return await keycloakRequest(payload);
 }
 
 const openidIntrospect = async (token) => {
@@ -110,7 +107,22 @@ module.exports.validateTokenFromCookie = async (session) => {
 			throw new Error('Token was not provided.');
 		}
 
-		jwt.check(token);
+		const resToken = await jwt.check(token);
+		console.log("---------- JWT---------- ");
+		console.log(resToken)
+		console.log("------------------------------");
+		if (jwt.isNearExpiration(resToken)) {
+			console.log("TOKEN IS ABOUT TO EXPIRE! REFRESHING!");
+
+			const refreshToken = auth['refresh_token'];
+			if (!refreshToken) {
+				throw new Error('Refresh token is not present.');
+			}
+			const newToken = await openidRefresh(refreshToken);
+			console.log("---------- NEW TOKEN! ----------");
+			console.log(newToken);
+			storage[sessionId] = newToken;
+		}
 	} else {
 		throw new Error('Storage not created');
 	}
