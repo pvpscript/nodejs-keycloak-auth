@@ -9,7 +9,9 @@
 //const secure = require('./secure');
 //const keycloak = require('./keycloak');
 
-import dotenvSafe from 'dotenv-safe';
+//import dotenvSafe from 'dotenv-safe';
+import 'dotenv-safe/config.js';
+
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
