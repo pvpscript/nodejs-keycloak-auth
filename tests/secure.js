@@ -1,5 +1,7 @@
-const { Router } = require('express');
-const keycloak = require('./keycloak');
+import keycloak from './keycloak.js';
+import { Router } from 'express';
+//const { Router } = require('express');
+//const keycloak = require('./keycloak');
 
 const router = Router()
 
@@ -42,4 +44,4 @@ router.use((err, req, res, next) => {
 	}
 });
 
-module.exports.router = router;
+export default { router };

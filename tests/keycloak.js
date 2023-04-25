@@ -1,4 +1,5 @@
-const jwt = require('./jwt');
+import jwt from './jwt.js';
+//const jwt = require('./jwt');
 
 const CLIENT_ID = process.env.KC_CLIENT_ID;
 const CLIENT_SECRET = process.env.KC_CLIENT_SECRET;
@@ -25,7 +26,7 @@ const keycloakRequest = async (payload) => {
 		.then(r => r.json())
 }
 
-module.exports.startLogin = function() {
+export const startLogin = () => {
 	const data = {
 		'client_id': CLIENT_ID,
 		'response_type': 'code',
@@ -49,7 +50,7 @@ const openidRefresh = async (refreshToken) => {
 	return await keycloakRequest(payload);
 }
 
-module.exports.openidToken = async (code) => {
+export const openidToken = async (code) => {
 	const payload = {
 		'grant_type': 'authorization_code',
 		'client_id': CLIENT_ID,
@@ -77,7 +78,7 @@ const openidIntrospect = async (token) => {
 	});
 }
 
-module.exports.validateToken = async (auth) => {
+export const validateToken = async (auth) => {
 	if (auth) {
 		const token = auth.replace(/^Bearer /, '');
 		const result = await openidIntrospect(token).then(r => r.json());
@@ -92,7 +93,7 @@ module.exports.validateToken = async (auth) => {
 	}
 };
 
-module.exports.validateTokenFromCookie = async (session) => {
+export const validateTokenFromCookie = async (session) => {
 	const storage = session['redis_db']; // emulating a database
 	const sessionId = session.id;
 
@@ -126,4 +127,11 @@ module.exports.validateTokenFromCookie = async (session) => {
 	} else {
 		throw new Error('Storage not created');
 	}
+};
+
+export default {
+	startLogin,
+	openidToken,
+	validateToken,
+	validateTokenFromCookie
 };

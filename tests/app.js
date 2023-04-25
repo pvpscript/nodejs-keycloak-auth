@@ -1,12 +1,24 @@
-require('dotenv-safe').config();
+//import { dotenv-sa
+//require('dotenv-safe').config();
+//
+//const express = require('express');
+//const cookieParser = require('cookie-parser');
+//const session = require('express-session');
+//const crypto = require('crypto');
+//
+//const secure = require('./secure');
+//const keycloak = require('./keycloak');
 
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
-const crypto = require('crypto');
+import dotenvSafe from 'dotenv-safe';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import crypto from 'crypto';
 
-const secure = require('./secure');
-const keycloak = require('./keycloak');
+import { nanoid } from 'nanoid';
+
+import secure from './secure.js';
+import keycloak from './keycloak.js';
 
 const app = express()
 const port = 9876;

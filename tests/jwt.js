@@ -1,10 +1,12 @@
-const jwt = require('jsonwebtoken');
-const { JwksClient } = require('jwks-rsa');
+import jwt from 'jsonwebtoken';
+import { JwksClient } from 'jwks-rsa';
+//const jwt = require('jsonwebtoken');
+//const { JwksClient } = require('jwks-rsa');
 
 const KC_CERTS_URI = process.env.KC_REALM_URI + '/protocol/openid-connect/certs';
 const JWT_EXPIRATION_OFFSET = process.env.JWT_EXPIRATION_OFFSET;
 
-const check = async (token) => new Promise((resolve, reject) => {
+export const check = async (token) => new Promise((resolve, reject) => {
 	const client = new JwksClient({
 		jwksUri: KC_CERTS_URI,
 		cache: true,
@@ -25,10 +27,11 @@ const check = async (token) => new Promise((resolve, reject) => {
 	});
 });
 
-const isNearExpiration = (token) => {
+export const isNearExpiration = (token) => {
 	const remaining = token.exp - Date.now() / 1000;
 
 	return remaining < JWT_EXPIRATION_OFFSET;
 };
 
-module.exports = { check, isNearExpiration };
+//module.exports = { check, isNearExpiration };
+export default { check, isNearExpiration };

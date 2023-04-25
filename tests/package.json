@@ -1,5 +1,6 @@
 {
   "name": "nodejs-keycloak-auth",
+  "type": "module",
   "version": "1.0.0",
   "description": "Boiler plate nodejs + express code that implements keycloak authentication methods",
   "main": "index.js",
