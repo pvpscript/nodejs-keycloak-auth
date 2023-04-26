@@ -1,7 +1,5 @@
 import keycloak from './keycloak.js';
 import { Router } from 'express';
-//const { Router } = require('express');
-//const keycloak = require('./keycloak');
 
 const router = Router()
 

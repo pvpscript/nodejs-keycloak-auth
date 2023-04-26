@@ -1,15 +1,3 @@
-//import { dotenv-sa
-//require('dotenv-safe').config();
-//
-//const express = require('express');
-//const cookieParser = require('cookie-parser');
-//const session = require('express-session');
-//const crypto = require('crypto');
-//
-//const secure = require('./secure');
-//const keycloak = require('./keycloak');
-
-//import dotenvSafe from 'dotenv-safe';
 import 'dotenv-safe/config.js';
 
 import express from 'express';
@@ -53,16 +41,17 @@ app.get('/start-login', (req, res) => {
 	const state = nanoid();
 	const loginUri = keycloak.startLogin(state);
 
+	const expiry = 60 * 5 * 1000;
 	res.cookie('stateParam', state, {
-		maxAge: 1000 * 60 * 5,
+		maxAge: expiry,
 		signed: true,
 	});
 
 	res.redirect(loginUri);
 });
 
-app.get('/callback', async (req, res, next) => {
-	console.log("---------- CHAMAVOLTA ----------");
+app.get('/callback', async (req, res) => {
+	console.log("---------- CALLBACK ROUTE ----------");
 	const sessionId = req.session.id;
 	console.log(`Session ID: ${sessionId}`);
 
@@ -74,7 +63,9 @@ app.get('/callback', async (req, res, next) => {
 	console.log(`Saved state: ${stateParam}`);
 
 	if (state !== stateParam) {
-		res.status(500).json({err: 'Invalid state!'});
+		res.status(500).json({
+			err: 'Invalid state!'
+		});
 	}
 
 	const result = await keycloak.openidToken(code, state);
@@ -87,31 +78,7 @@ app.get('/callback', async (req, res, next) => {
 	console.log(`REFERER: ${req.headers.referer}`);
 	res.redirect('back'); // Should redirect back to the original path
 });
-//
-//app.get('/introspect-middleware', async (req, res) => {
-//	res.send("Introspection done!");
-//});
-//
-//app.get('/introspect-test', async (req, res) => {
-//	const authorization = req.headers.authorization;
-//
-//	const token = authorization.replace(/^Bearer /, '');
-//	const result = await openidIntrospect(token).then(r => r.json());
-//
-//	res.send(result);
-//});
-//
-//app.get('/refresh-test', async (req, res) => {
-//	const refresh = req.headers.refreshtoken;
-//	const result = await openidRefresh(refresh).then(r => r.json());
-//
-//	res.send(result);
-//});
-//
-//app.get('*', (req, res) => {
-//	res.send('Not found');
-//});
-//
+
 app.get('/', (req, res) => {
 	return res.json({
 		msg: 'Hello, Worldeh!',
@@ -122,16 +89,6 @@ app.get('/', (req, res) => {
 	});
 });
 
-
-//app.use((err, req, res, next) => {
-//	if (err) {
-//		res.status(500).json({
-//			msg: 'An error occurred on the root app!',
-//			error: err,
-//			status: 500,
-//		});
-//	}
-//});
 
 app.listen(port, () => {
 	console.log(`App listening on port ${port}`);

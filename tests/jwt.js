@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
 import { JwksClient } from 'jwks-rsa';
-//const jwt = require('jsonwebtoken');
-//const { JwksClient } = require('jwks-rsa');
 
 const KC_CERTS_URI = process.env.KC_REALM_URI + '/protocol/openid-connect/certs';
 const JWT_EXPIRATION_OFFSET = process.env.JWT_EXPIRATION_OFFSET;
