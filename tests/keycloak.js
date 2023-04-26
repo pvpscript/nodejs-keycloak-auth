@@ -1,5 +1,4 @@
 import jwt from './jwt.js';
-//const jwt = require('./jwt');
 
 const CLIENT_ID = process.env.KC_CLIENT_ID;
 const CLIENT_SECRET = process.env.KC_CLIENT_SECRET;
@@ -26,13 +25,13 @@ const keycloakRequest = async (payload) => {
 		.then(r => r.json())
 }
 
-export const startLogin = () => {
+export const startLogin = (state) => {
 	const data = {
 		'client_id': CLIENT_ID,
 		'response_type': 'code',
 		'redirect_uri': 'http://localhost:9876/callback',
 		scope: 'openid',
-		state: 'my_state',
+		state: state,
 	};
 
 	const loginUri = OPENID_AUTH_URI + "?" + urlEncodeObjectData(data);
@@ -50,13 +49,14 @@ const openidRefresh = async (refreshToken) => {
 	return await keycloakRequest(payload);
 }
 
-export const openidToken = async (code) => {
+export const openidToken = async (code, state) => {
 	const payload = {
 		'grant_type': 'authorization_code',
 		'client_id': CLIENT_ID,
 		'client_secret': CLIENT_SECRET,
 		'redirect_uri': 'http://localhost:9876/callback',
 		code: code,
+		state: state,
 	};
 
 	return await keycloakRequest(payload);
