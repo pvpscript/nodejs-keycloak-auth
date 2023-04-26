@@ -10,6 +10,8 @@ import { nanoid } from 'nanoid';
 import secure from './secure.js';
 import keycloak from './keycloak.js';
 
+import { base64URLEncode } from './utils.js';
+
 const app = express()
 const port = 9876;
 
@@ -39,10 +41,15 @@ app.use('/secure', secure.router);
 
 app.get('/start-login', (req, res) => {
 	const state = nanoid();
-	const loginUri = keycloak.startLogin(state);
+	const verifier = base64URLEncode(crypto.randomBytes(32));
+	const loginUri = keycloak.startLogin(verifier, state);
 
 	const expiry = 60 * 5 * 1000;
 	res.cookie('stateParam', state, {
+		maxAge: expiry,
+		signed: true,
+	});
+	res.cookie('verifier', verifier, {
 		maxAge: expiry,
 		signed: true,
 	});
@@ -56,7 +63,7 @@ app.get('/callback', async (req, res) => {
 	console.log(`Session ID: ${sessionId}`);
 
 	const { code, state } = req.query;
-	const { stateParam } = req.signedCookies;
+	const { stateParam, verifier } = req.signedCookies;
 
 	console.log(`Code: ${code}`);
 	console.log(`State: ${state}`);
@@ -68,7 +75,7 @@ app.get('/callback', async (req, res) => {
 		});
 	}
 
-	const result = await keycloak.openidToken(code, state);
+	const result = await keycloak.openidToken(code, verifier, state);
 
 	// Should record session inside a database
 	// 'storage' key emulates a database in the cookie storage space.

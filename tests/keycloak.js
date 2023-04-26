@@ -1,4 +1,6 @@
+import crypto from 'crypto';
 import jwt from './jwt.js';
+import { base64URLEncode, sha256 } from './utils.js';
 
 const CLIENT_ID = process.env.KC_CLIENT_ID;
 const CLIENT_SECRET = process.env.KC_CLIENT_SECRET;
@@ -25,11 +27,15 @@ const keycloakRequest = async (payload) => {
 		.then(r => r.json())
 }
 
-export const startLogin = (state) => {
+
+export const startLogin = (verifier, state) => {
+	const challenge = base64URLEncode(sha256(verifier));
 	const data = {
 		'client_id': CLIENT_ID,
 		'response_type': 'code',
 		'redirect_uri': 'http://localhost:9876/callback',
+		'code_challenge': challenge,
+		'code_challenge_method': 'S256',
 		scope: 'openid',
 		state: state,
 	};
@@ -49,12 +55,13 @@ const openidRefresh = async (refreshToken) => {
 	return await keycloakRequest(payload);
 }
 
-export const openidToken = async (code, state) => {
+export const openidToken = async (code, verifier, state) => {
 	const payload = {
 		'grant_type': 'authorization_code',
 		'client_id': CLIENT_ID,
 		'client_secret': CLIENT_SECRET,
 		'redirect_uri': 'http://localhost:9876/callback',
+		'code_verifier': verifier,
 		code: code,
 		state: state,
 	};
