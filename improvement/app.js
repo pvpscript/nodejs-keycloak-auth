@@ -51,18 +51,13 @@ app.get('/callback', async (req, res) => {
 
 	const result = await keycloak.openidToken(code, verifier, state);
 
-	res.cookie('auth', result, {
-		maxAge: 60 * 60 * 1000,
-		signed: true,
-	});
+	res.status(201).json(result);
 });
 
 app.get('/', (req, res) => {
 	return res.json({
-		msg: 'Hello, World!',
 		cookies: req.cookies,
 		signedCookies: req.signedCookies,
-		sess: req.session,
 	});
 });
 
