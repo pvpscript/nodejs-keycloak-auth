@@ -1,0 +1,40 @@
+{
+  "name": "nodejs-keycloak-auth",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Boiler plate nodejs + express code that implements keycloak authentication methods",
+  "main": "index.js",
+  "scripts": {
+    "devStart": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pvpscript/nodejs-keycloak-auth.git"
+  },
+  "keywords": [
+    "keycloak",
+    "auth"
+  ],
+  "author": "pvpscript",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pvpscript/nodejs-keycloak-auth/issues"
+  },
+  "homepage": "https://github.com/pvpscript/nodejs-keycloak-auth#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "connect-redis": "^7.0.1",
+    "cookie-parser": "^1.4.6",
+    "dotenv-safe": "^8.2.0",
+    "express-session": "^1.17.3",
+    "install": "^0.13.0",
+    "jsonwebtoken": "^9.0.0",
+    "jwks-rsa": "^3.0.1",
+    "nanoid": "^4.0.2",
+    "nodemon": "^2.0.22",
+    "npm": "^9.6.4",
+    "redis": "^4.6.5"
+  }
+}
