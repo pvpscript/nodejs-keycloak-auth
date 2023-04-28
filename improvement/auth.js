@@ -6,7 +6,7 @@ const KC_CERTS_URI = process.env.KC_REALM_URI + '/protocol/openid-connect/certs'
 const check = (req, res, next) => {
 	const bearer = req.header('authorization');
 	if (!bearer) {
-		res.status(401).json({
+		return res.status(401).json({
 			error: 'Token not provided.',
 		});
 	}
